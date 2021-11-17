@@ -1,0 +1,13 @@
+<launch>
+  <!-- Start Gazebo with the robot under PD control. -->
+  <include file="$(find project)/launch/gazebo_sevendof_dynamic_pdcontrolled.launch"/>
+
+  <!-- Start the trajectory demo -->
+  <node pkg ="project"
+  	type="gazebodemo_trajectory.py"
+	name="trajectory"
+	output="screen"
+	required="true">
+  </node>
+
+</launch>

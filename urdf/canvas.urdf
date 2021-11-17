@@ -1,0 +1,66 @@
+<robot name="canvas">
+  <link name="world"/>
+
+  <joint name="attach1" type="fixed">
+    <parent link="world"/>
+    <child  link="back"/>
+  </joint>
+
+  <link name="back">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="1.0" />
+      <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="100.0"  iyz="0.0"  izz="1.0" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0.075 0"/>
+      <geometry>
+        <box size="2.2 0.05 2.2" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.075 0"/>
+      <geometry>
+        <box size="2.2 0.05 2.2" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="back">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <joint name="spring" type="prismatic">
+    <parent link="back"/>
+    <child link="front"/>
+    <limit effort="1000.0" lower="0" upper="0" velocity="0.5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <link name="front">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="1.0" />
+      <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="100.0"  iyz="0.0"  izz="1.0" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0.025 0"/>
+      <geometry>
+        <box size="2 0.05 2" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.025 0"/>
+      <geometry>
+        <box size="2 0.05 2" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="front">
+    <material>Gazebo/White</material>
+  </gazebo>
+
+
+
+
+</robot>
