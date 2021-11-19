@@ -1,3 +1,5 @@
+<?xml version="1.0"?>
+
 <robot name="canvas">
   <link name="world"/>
 
@@ -13,13 +15,13 @@
       <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="100.0"  iyz="0.0"  izz="1.0" />
     </inertial>
     <visual>
-      <origin xyz="0 0.075 0"/>
+      <origin xyz="0 -0.075 0"/>
       <geometry>
         <box size="2.2 0.05 2.2" />
       </geometry>
     </visual>
     <collision>
-      <origin xyz="0 0.075 0"/>
+      <origin xyz="0 -0.075 0"/>
       <geometry>
         <box size="2.2 0.05 2.2" />
       </geometry>
@@ -37,6 +39,11 @@
     <axis xyz="0 1 0"/>
   </joint>
 
+  <!-- <joint name="spring" type="fixed">
+    <parent link="back"/>
+    <child  link="front"/>
+  </joint> -->
+
   <link name="front">
     <inertial>
       <origin xyz="0 0 0" />
@@ -44,19 +51,21 @@
       <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="100.0"  iyz="0.0"  izz="1.0" />
     </inertial>
     <visual>
-      <origin xyz="0 0.025 0"/>
+      <origin xyz="0 -0.025 0"/>
       <geometry>
         <box size="2 0.05 2" />
       </geometry>
     </visual>
     <collision>
-      <origin xyz="0 0.025 0"/>
+      <origin xyz="0 -0.025 0"/>
       <geometry>
         <box size="2 0.05 2" />
       </geometry>
     </collision>
   </link>
   <gazebo reference="front">
+    <mu1>0.01</mu1>
+    <mu2>0.02</mu2>
     <material>Gazebo/White</material>
   </gazebo>
 

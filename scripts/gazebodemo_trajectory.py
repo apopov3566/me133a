@@ -18,7 +18,9 @@ import numpy as np
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64
 from urdf_parser_py.urdf import Robot
-from project.msg import DrawingTip
+from draw_controller import getCanvases
+
+from math import pi
 
 # Import the kinematics stuff:
 from kinematics import Kinematics, p_from_T, R_from_T, Rx, Ry, Rz
@@ -30,9 +32,15 @@ from kinematics import Kinematics, p_from_T, R_from_T, Rx, Ry, Rz
 from splines import CubicSpline, Goto, Hold, Stay, QuinticSpline, Goto5, LinearSpline
 
 
+CANVAS_ATTRACTION_DISTANCE = 0.03  # distance when pen starts pull to canvas
+CANVAS_TARGET_DEPTH = 0  # target pull depth (stops pulling when reached)
+CANVAS_PRESSURE_SCALING = 0.3  # strength of pull based on distance
+
 #
 #  Generator Class
 #
+
+
 class Generator:
     # Initialize.
     def __init__(self):
@@ -42,11 +50,11 @@ class Generator:
         self.N = 7
         self.pubs = []
 
+        self.canvases = getCanvases()
+
         for i in range(self.N):
             topic = "/sevendof/j" + str(i + 1) + "_pd_control/command"
             self.pubs.append(rospy.Publisher(topic, Float64, queue_size=10))
-
-        self.tippub = rospy.Publisher('/drawingtip', DrawingTip, queue_size=10)
         # # We used to add a short delay to allow the connection to form
         # # before we start sending anything.  However, if we start
         # # Gazebo "paused", this already provides time for the system
@@ -58,8 +66,9 @@ class Generator:
         # have this information.  Of course, the simulation starts at
         # zero, so we can simply use that information too.
         msg = rospy.wait_for_message("/sevendof/joint_states", JointState)
-        theta0 = np.array(msg.position).reshape((-1, 1))
-        rospy.loginfo("Gazebo's starting position: %s", str(theta0.T))
+        self.theta_a = np.array(msg.position).reshape(7)
+        self.theta_d = np.array(msg.position).reshape(7)
+        rospy.loginfo("Gazebo's starting position: %s", str(self.theta_a))
 
         # IF we wanted to do kinematics:
         # # Grab the robot's URDF from the parameter server.
@@ -68,34 +77,55 @@ class Generator:
         self.kin = Kinematics(robot, 'world', 'tip')
 
         # Pick a starting and final joint position.
-        thetaA = np.zeros((self.N, 1))
-        thetaB = np.array(
-            [-np.pi / 2, np.pi / 4, 0.0, -np.pi / 2, 0.0, -np.pi / 4, 0.0]
-        ).reshape((-1, 1))
+        p0r = np.array([0, 0.5, 0.3, 0]).reshape((4, 1))
+        pA = np.array([-0.25, 0.697, 0.3, 0]).reshape((4, 1))
+        pB = np.array([-0.25, 0.697, 0.8, 0]).reshape((4, 1))
+        pC = np.array([0.25, 0.697, 0.8, 0]).reshape((4, 1))
+        pD = np.array([0.25, 0.697, 0.3, 0]).reshape((4, 1))
 
-        # Create the trajectory segments.  When the simulation first
-        # turns on, the robot sags slightly due to it own weight.  So
-        # we start with a 2s hold to allow any ringing to die out.
+        p1r = np.array([-0.5, 0, 0.3, pi/2]).reshape((4, 1))
+        p2r = np.array([0, -0.5, 0.3, pi]).reshape((4, 1))
 
-        # part a
-        # self.segments = (Hold(thetaA, 2.0), Hold(thetaB, 20.0))
+        pA2 = np.array([-0.25, -0.697, 0.3, pi]).reshape((4, 1))
+        pB2 = np.array([-0.25, -0.697, 0.8, pi]).reshape((4, 1))
+        pC2 = np.array([0.25, -0.697, 0.8, pi]).reshape((4, 1))
+        pD2 = np.array([0.25, -0.697, 0.3, pi]).reshape((4, 1))
 
-        # part b
-        # self.segments = (
-        #     Hold(thetaA, 2.0),
-        #     LinearSpline(thetaA, thetaB, 2.0),
-        #     Hold(thetaB, 20.0),
-        # )
+        T, J = self.kin.fkin(self.theta_a)
+        p = p_from_T(T).reshape(3)
+        p0 = np.array([[p[0], p[1], p[2], 0]]).reshape((4, 1))
 
-        # part c
-        self.segments = (
-            Hold(thetaA, 2.0),
-            Goto(thetaA, thetaB, 2.0),
-            Hold(thetaB, 20.0),
-        )
+        self.segments = [
+            Hold(p0, 1.0),
+            Goto(p0, p0r, 2.0),
+            Goto(p0r, pA, 2.0),
+            Hold(pA, 1.0),
+            Goto(pA, pB, 2.0),
+            Goto(pB, pC, 2.0),
+            Goto(pC, pD, 2.0),
+            Goto(pD, pA, 2.0),
+            Goto(pA, p0r, 2.0),
+            Goto(p0r, p1r, 2.0),
+            Goto(p1r, p2r, 2.0),
+            Goto(p2r, pA2, 2.0),
+            Hold(pA2, 1.0),
+            Goto(pA2, pB2, 2.0),
+            Goto(pB2, pC2, 2.0),
+            Goto(pC2, pD2, 2.0),
+            Goto(pD2, pA2, 2.0),
+            Goto(pA2, p2r, 2.0),
+            Hold(p2r, 1000.0),
+        ]
 
         # Also reset the trajectory, starting at the beginning.
         self.reset()
+
+        rospy.Subscriber("/sevendof/joint_states",
+                         JointState, self.jointCallback)
+
+    def jointCallback(self, msg):
+        self.theta_a = np.array(msg.position).reshape(7)
+        # print("t", self.theta_a)
 
     # Reset.  If the simulation resets, also restart the trajectory.
     def reset(self):
@@ -118,21 +148,32 @@ class Generator:
             return
 
         # Grab the spline output as joint values.
-        (theta, thetadot) = self.segments[self.index].evaluate(t - self.t0)
+        (p, pd) = self.segments[self.index].evaluate(t - self.t0)
 
-        # FIX THIS: OR YOU MAY DECIDE TO PROGRAM SOME OTHER FORM OF TRAJECTORY?
+        # print("p", p)
+        # print("pd", pd)
+
+        weights = np.eye(6)
+        T, _ = self.kin.fkin(self.theta_a)
+        if (p_from_T(T).reshape(3)[1] > 0.67):
+            np.fill_diagonal(weights, [2, 0.05, 2, 5, 5, 5])
+        else:
+            np.fill_diagonal(weights, [2.0, 0.1, 2, 5, 5, 5])
+
+        # if near a board, create pressure into the board
+        pde = np.array([0.0, 0.0, 0.0])
+        for C in self.canvases:
+            pc = p_from_T(C @ T).reshape(3)
+            if pc[1] < CANVAS_ATTRACTION_DISTANCE:
+                pde += (np.linalg.inv(R_from_T(C)
+                                      ) @ np.array([0.0, min(0.0, CANVAS_PRESSURE_SCALING * (CANVAS_TARGET_DEPTH - pc[1])), 0.0])).reshape(3)
+
+        (self.theta_d, _) = self.kin.velocity_ikin_a(
+            self.theta_d, self.theta_a, p[0:3, :].reshape((3, 1)), Rz(p[3]), pd[0:3, :].reshape((3, 1)) + pde.reshape((3, 1)), np.array([0, 0, pd[3]]).reshape((3, 1)), weights, 0.5, dt)
 
         # Send the individal angle commands.
         for i in range(self.N):
-            self.pubs[i].publish(Float64(theta[i]))
-
-        T, J = self.kin.fkin(theta)
-        p = T[0:3, 3:4].reshape(3)
-        drawingtip = DrawingTip()
-        drawingtip.x = p[0]
-        drawingtip.y = p[1]
-        drawingtip.z = p[2]
-        self.tippub.publish(drawingtip)
+            self.pubs[i].publish(Float64(self.theta_d[i]))
 
 
 #

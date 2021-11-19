@@ -171,6 +171,45 @@ class Kinematics:
         rospy.loginfo("Kinematics: %d active DOFs, %d total steps",
                       self.dofs, len(self.joints))
 
+    def pe(self, pd, p):
+        return pd - p
+
+    def Re(self, Rd, R):
+        s = [0, 0, 0]
+        for i in range(3):
+            s += np.cross(R[0:3, i].reshape((1, 3)),
+                          Rd[0:3, i].reshape((1, 3)))
+        return 1 / 2 * s.reshape(3, 1)
+
+    def me(self, theta):
+        return 0 - (theta[0] + theta[2])
+
+    def velocity_ikin_a(self, theta_d, theta_a, pd, Rd, vd, wd, weights, l, dt, g=10):
+        T, J = self.fkin(theta_d)
+        Ta, Ja = self.fkin(theta_a)
+
+        theta_extra = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+
+        p = p_from_T(T)
+        pa = p_from_T(Ta)
+        R = R_from_T(T)
+        Ra = R_from_T(Ta)
+
+        joint_targets = {2: 0.0}
+
+        for joint in joint_targets:
+            theta_extra[joint] = g * \
+                (joint_targets[joint] - theta_a.reshape(7)[joint])
+
+        theta_vel = (np.dot(
+            np.linalg.pinv(Ja),
+            np.vstack((vd, wd)) + l * weights @
+            (np.vstack((self.pe(pd, pa), self.Re(Rd, Ra)))),
+        ) + np.dot(np.eye(7) - (np.linalg.pinv(Ja) @ Ja), theta_extra.reshape(7, 1))).reshape(7)
+        theta_new = theta_d + dt * theta_vel
+
+        return (theta_new, theta_vel)
+
     def fkin(self, theta):
         # Check the number of joints
         if (len(theta) != self.dofs):

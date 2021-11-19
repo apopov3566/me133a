@@ -7,10 +7,10 @@
     <arg name="world_name" default="$(find project)/worlds/realtime.world"/>
   -->
   <arg name="paused"     default="true"/>
-  <arg name="world_name" default="$(find project)/worlds/slowtime.world"/>
+  <arg name="world_name" default="$(find project)/worlds/realtime.world"/>
 
   <!-- URDF file parameter. -->
-  <arg name="model" default="$(find project)/urdf/sevenDOF_gazebo_dynamic.urdf"/>
+  <arg name="model" default="$(find project)/urdf/project.urdf"/>
   <arg name="canvas" default="$(find project)/urdf/canvas.urdf"/>
 
   <!-- The control parameters, stored in the YAML file.  -->
@@ -43,15 +43,22 @@
 	name="robot_spawner"
 	respawn="false"
 	output="screen"
-	args="-urdf -model sevendof -param robot_description"/>
+	args="-urdf -model sevendof -param robot_description -J theta1 0.00 -J theta2 0.00 -J theta3 0.00 -J theta4 0.00 -J theta5 0.00 -J theta6 0.00 -J theta7 0.00"/>
 
-  <!-- Service call to gazebo_ros to spawn a beer can model -->
+  <!-- Service call to gazebo_ros to spawn a canvas model -->
   <node pkg ="gazebo_ros"
 	type="spawn_model"
 	name="canvas_spawner"
 	respawn="false"
 	output="screen"
-	args="-urdf -model canvas -param canvas_description -x 0.5 -y 0.5 -z 1.1 -Y -1.5705"/>
+	args="-urdf -model canvas -param canvas_description -x 0.0 -y 0.7 -z 1.1 -Y 3.1415"/>
+
+  <node pkg ="gazebo_ros"
+	type="spawn_model"
+	name="canvas_spawner_2"
+	respawn="false"
+	output="screen"
+	args="-urdf -model canvas2 -param canvas_description -x 0.0 -y -0.7 -z 1.1"/>
 
   <!-- Load the controllers. -->
   <node pkg ="controller_manager"
@@ -66,6 +73,20 @@
   <node pkg ="project"
   	type="gazebodemo_trajectory.py"
 	name="trajectory"
+	output="screen"
+	required="true">
+  </node>
+
+  <node pkg ="project"
+  	type="draw_controller.py"
+	name="controller"
+	output="screen"
+	required="true">
+  </node>
+
+  <node pkg ="project"
+  	type="tipdraw"
+	name="tipdraw"
 	output="screen"
 	required="true">
   </node>
