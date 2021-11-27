@@ -25,6 +25,9 @@ void counterCallback(const project::DrawingTip::ConstPtr &msg)
                       ignition::math::Pose3d(msg->x, msg->y, msg->z, 0, 0, 0));
   ignition::msgs::Set(markerMsg.mutable_scale(),
                       ignition::math::Vector3d(0.02, 0.02, 0.02));
+  // ignition::msgs::Time *lt = ignition::msgs::Time.New();
+  // lt->set_sec(1);
+  // ignition::msgs::Set(markerMsg.mutable_lifetime(), lt);
   node.Request("/marker", markerMsg);
 }
 
@@ -32,10 +35,7 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "tipdraw");
   ros::NodeHandle nh;
-
   ros::Subscriber tipsub = nh.subscribe("/tipdraw", 10, counterCallback);
-
   ros::spin();
-
   return 0;
 }
