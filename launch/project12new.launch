@@ -11,6 +11,7 @@
 
   <!-- URDF file parameter. -->
   <arg name="model" default="$(find project)/urdf/twelvedof_new.urdf"/>
+  <arg name="canvas" default="$(find project)/urdf/canvas.urdf"/>
 
   <!-- The control parameters, stored in the YAML file.  -->
   <arg name="control_parameters"
@@ -19,6 +20,7 @@
 
   <!-- Load the URDF into the ROS Parameter Server -->
   <param name="robot_description" textfile="$(arg model)"/>
+  <param name="canvas_description" textfile="$(arg canvas)"/>
 
   <!-- Load the controller parameters -->
   <rosparam command="load" file="$(arg control_parameters)"/>
@@ -43,6 +45,20 @@
 	output="screen"
 	args="-urdf -model twelvedof -param robot_description"/>
 
+  <!-- Service call to gazebo_ros to spawn a canvas model -->
+  <node pkg ="gazebo_ros"
+	type="spawn_model"
+	name="canvas_spawner"
+	respawn="false"
+	output="screen"
+	args="-urdf -model canvas -param canvas_description -x 0.3 -y 0.5 -z 1.1 -Y 1.5708"/>
+
+  <node pkg ="gazebo_ros"
+	type="spawn_model"
+	name="canvas_spawner_2"
+	respawn="false"
+	output="screen"
+	args="-urdf -model canvas2 -param canvas_description -x -0.8 -y 1.5 -z 1.1 -Y 3.14159"/>
 
   <!-- Load the controllers. -->
   <node pkg ="controller_manager"
@@ -52,4 +68,27 @@
 	output="screen"
 	ns="/twelvedof"
 	args="joint_state_publisher j1_pd_control j2_pd_control j3_pd_control j4_pd_control j5_pd_control j6_pd_control j7_pd_control j8_pd_control j9_pd_control j10_pd_control j11_pd_control j12_pd_control"/>
+
+  <!-- Start the trajectory demo -->
+  <node pkg ="project"
+    type="trajectory12.py"
+	name="trajectory"
+	output="screen"
+	required="true">
+  </node>
+
+  <node pkg ="project"
+  	type="draw12_controller.py"
+	name="controller"
+	output="screen"
+	required="true">
+  </node>
+
+  <node pkg ="project"
+  	type="tipdraw"
+	name="tipdraw"
+	output="screen"
+	required="true">
+  </node>
+
 </launch>
