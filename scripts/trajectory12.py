@@ -126,8 +126,8 @@ class Generator:
         p0r = np.array([0, 1.3, 0.4, 0]).reshape((4, 1))
         pA = np.array([0, 1.495, 0.3, 0]).reshape((4, 1))
         pB = np.array([0, 1.495, 0.8, 0]).reshape((4, 1))
-        pC = np.array([-0.25, 1.495, 0.8, 0]).reshape((4, 1))
-        pD = np.array([-0.25, 1.495, 0.3, 0]).reshape((4, 1))
+        pC = np.array([-1.0, 1.495, 0.8, 0]).reshape((4, 1))
+        pD = np.array([-1.0, 1.495, 0.3, 0]).reshape((4, 1))
 
         rospy.loginfo("Gazebo's starting position: %s", str(self.theta_a))
         rospy.loginfo("tip_full starting position: %s", p0)
@@ -139,9 +139,9 @@ class Generator:
                 Goto(p0r, pA, 2.0),
                 Hold(pA, 1.0),
                 Goto(pA, pB, 2.0),
-                Goto(pB, pC, 2.0),
+                Goto(pB, pC, 6.0),
                 Goto(pC, pD, 2.0),
-                Goto(pD, pA, 2.0),
+                Goto(pD, pA, 6.0),
                 Goto(pA, p0r, 2.0),
                 Hold(p0r, 1000.0),
             ]
@@ -154,8 +154,8 @@ class Generator:
         p0r_2 = np.array([0.1, 0.6, 0.2, -pi / 2]).reshape((4, 1))
         pA_2 = np.array([0.295, 0.6, 0.2, -pi / 2]).reshape((4, 1))
         pB_2 = np.array([0.295, 0.6, 0.5, -pi / 2]).reshape((4, 1))
-        pC_2 = np.array([0.295, 0.8, 0.5, -pi / 2]).reshape((4, 1))
-        pD_2 = np.array([0.295, 0.8, 0.2, -pi / 2]).reshape((4, 1))
+        pC_2 = np.array([0.295, 0.4, 0.5, -pi / 2]).reshape((4, 1))
+        pD_2 = np.array([0.295, 0.4, 0.2, -pi / 2]).reshape((4, 1))
         rospy.loginfo("tip_elbow starting position: %s", p0_2)
 
         self.Image_elbow = Image(
@@ -175,7 +175,8 @@ class Generator:
         # Also reset the trajectory, starting at the beginning.
         self.reset()
 
-        rospy.Subscriber("/twelvedof/joint_states", JointState, self.jointCallback)
+        rospy.Subscriber("/twelvedof/joint_states",
+                         JointState, self.jointCallback)
 
     def jointCallback(self, msg):
         self.theta_a = np.array(msg.position).reshape(12)
@@ -199,7 +200,8 @@ class Generator:
                             0.0,
                             min(
                                 0.0,
-                                CANVAS_PRESSURE_SCALING * (CANVAS_TARGET_DEPTH - pc[1]),
+                                CANVAS_PRESSURE_SCALING *
+                                (CANVAS_TARGET_DEPTH - pc[1]),
                             ),
                             0.0,
                         ]
@@ -262,7 +264,8 @@ if __name__ == "__main__":
     rate = 100
     servo = rospy.Rate(rate)
     dt = servo.sleep_dur.to_sec()
-    rospy.loginfo("Running the servo loop with dt of %f seconds (%fHz)" % (dt, rate))
+    rospy.loginfo(
+        "Running the servo loop with dt of %f seconds (%fHz)" % (dt, rate))
 
     # Run the servo loop until shutdown (killed or ctrl-C'ed).  This
     # relies on rospy.Time, which is set by the simulation.  Therefore

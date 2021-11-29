@@ -120,13 +120,17 @@ def q_from_R(R):
     A = A[i]
     c = 0.5 / np.sqrt(A)
     if i == 0:
-        q = c * np.array([A, R[2][1] - R[1][2], R[0][2] - R[2][0], R[1][0] - R[0][1]])
+        q = c * np.array([A, R[2][1] - R[1][2], R[0]
+                         [2] - R[2][0], R[1][0] - R[0][1]])
     elif i == 1:
-        q = c * np.array([R[2][1] - R[1][2], A, R[1][0] + R[0][1], R[0][2] + R[2][0]])
+        q = c * np.array([R[2][1] - R[1][2], A, R[1]
+                         [0] + R[0][1], R[0][2] + R[2][0]])
     elif i == 2:
-        q = c * np.array([R[0][2] - R[2][0], R[1][0] + R[0][1], A, R[2][1] + R[1][2]])
+        q = c * np.array([R[0][2] - R[2][0], R[1][0] +
+                         R[0][1], A, R[2][1] + R[1][2]])
     else:
-        q = c * np.array([R[1][0] - R[0][1], R[0][2] + R[2][0], R[2][1] + R[1][2], A])
+        q = c * np.array([R[1][0] - R[0][1], R[0][2] +
+                         R[2][0], R[2][1] + R[1][2], A])
     return q
 
 
@@ -183,7 +187,8 @@ class Kinematics:
             self.joints.append([])
             frame = tipframe
             while frame != baseframe:
-                joint = next((j for j in robot.joints if j.child == frame), None)
+                joint = next(
+                    (j for j in robot.joints if j.child == frame), None)
                 if joint is None:
                     rospy.logerr("Unable find joint connecting to '%s'", frame)
                     raise Exception()
@@ -196,7 +201,8 @@ class Kinematics:
                 frame = joint.parent
 
             # Report we found.
-            self.dofs.append(sum(1 for j in self.joints[-1] if j.type != "fixed"))
+            self.dofs.append(
+                sum(1 for j in self.joints[-1] if j.type != "fixed"))
             rospy.loginfo(
                 "Kinematics: %d active DOFs, %d total steps",
                 self.dofs[-1],
@@ -209,8 +215,56 @@ class Kinematics:
     def Re(self, Rd, R):
         s = [0, 0, 0]
         for i in range(3):
-            s += np.cross(R[0:3, i].reshape((1, 3)), Rd[0:3, i].reshape((1, 3)))
+            s += np.cross(R[0:3, i].reshape((1, 3)),
+                          Rd[0:3, i].reshape((1, 3)))
         return 1 / 2 * s.reshape(3, 1)
+
+    def velocity_ikin_keep_axes(
+        self,
+        J_combined,
+        vd_combined,
+        pe_combined,
+        theta_a,
+        l,
+        keep_axes
+    ):
+        joint_mins = {0: 0.0}
+        joint_maxs = {8: 0.8}
+        g = 10
+        theta_extra = np.array([0.0] * self.dofs[0])
+        for joint in joint_mins:
+            theta_extra[joint] += g * \
+                max(0, (joint_mins[joint] -
+                        theta_a.reshape(self.dofs[0])[joint]))
+        for joint in joint_maxs:
+            theta_extra[joint] += g * \
+                min(0, (joint_maxs[joint] -
+                        theta_a.reshape(self.dofs[0])[joint]))
+
+        g_center = 0.5
+        g_limit = 0.3
+        for joint in range(self.dofs[0]):
+            theta_extra[joint] += max(-g_limit, min(g_limit, g_center * (0.0 -
+                                                                         theta_a.reshape(self.dofs[0])[joint])))
+
+        J_modified = J_combined[keep_axes, :]
+        return (
+            np.dot(
+                np.linalg.pinv(J_modified),
+                vd_combined[keep_axes]
+                + l
+                * pe_combined[keep_axes],
+            ) + np.dot(np.eye(self.dofs[0]) - (np.linalg.pinv(J_modified) @ J_modified), theta_extra.reshape(self.dofs[0], 1))
+        ).reshape(self.dofs[0])
+
+    def conditioned_with_keep_axes(
+        self,
+        J_combined,
+        keep_axes
+    ):
+        condition_threshold = 30
+        J_modified = J_combined[keep_axes, :]
+        return np.linalg.cond(J_modified) < condition_threshold
 
     def velocity_ikin_combined(
         self,
@@ -247,25 +301,29 @@ class Kinematics:
         # print("J_elbow", J_elbow.shape)
         # exit(1)
 
-        Jc = np.vstack((J_full, np.hstack((J_elbow, np.zeros((6, 6))))))
+        J_combined = np.vstack(
+            (J_full, np.hstack((J_elbow, np.zeros((6, 6))))))
 
-        theta_vel = (
-            np.dot(
-                np.linalg.inv(Jc),
-                np.vstack((vd_full, wd_full, vd_elbow, wd_elbow))
-                + l
-                * (
-                    np.vstack(
-                        (
-                            self.pe(pd_full, p_full),
-                            self.Re(Rd_full, R_full),
-                            self.pe(pd_elbow, p_elbow),
-                            self.Re(Rd_elbow, R_elbow),
-                        )
-                    )
-                ),
-            )
-        ).reshape(self.dofs[0])
+        keep_order = [0, 1, 2, 3, 4, 5, 9, 10, 11, 8, 7, 6]
+        keep_num = len(keep_order)
+
+        while (not self.conditioned_with_keep_axes(J_combined, keep_order[0:keep_num])):
+            keep_num -= 1
+
+        print(keep_num, np.linalg.cond(J_combined[keep_order[0:keep_num]]))
+        theta_vel = self.velocity_ikin_keep_axes(
+            J_combined,
+            np.vstack((vd_full, wd_full, vd_elbow, wd_elbow)),
+            np.vstack((
+                self.pe(pd_full, p_full),
+                self.Re(Rd_full, R_full),
+                self.pe(pd_elbow, p_elbow),
+                self.Re(Rd_elbow, R_elbow),
+            )),
+            theta_a,
+            l,
+            keep_order[0:keep_num]
+        )
 
         theta_new = theta_d + dt * theta_vel
 
@@ -326,8 +384,8 @@ class Kinematics:
         ptip = p_from_T(T)
         J = np.zeros((6, index))
         for i in range(index):
-            J[0:3, i : i + 1] = np.cross(elist[i], ptip - plist[i], axis=0)
-            J[3:6, i : i + 1] = elist[i]
+            J[0:3, i: i + 1] = np.cross(elist[i], ptip - plist[i], axis=0)
+            J[3:6, i: i + 1] = elist[i]
 
         # Return the Ttip and Jacobian (at the end of the chain).
         return (T, J)

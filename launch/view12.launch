@@ -3,7 +3,7 @@
        roslaunch command line. -->
   <arg name="urdf"  default="twelvedof.urdf"/>
   <arg name="model" default="$(find project)/urdf/$(arg urdf)"/>
-  <arg name="cfg"   default="$(find hw5)/rviz/viewp4.rviz" />
+  <arg name="cfg"   default="$(find project)/rviz/viewp4.rviz" />
 
 
   <!-- Load the URDF file into the robot_description parameter. -->

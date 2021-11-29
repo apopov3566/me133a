@@ -1,6 +1,7 @@
 <launch>
   <arg
     name="model" />
+  <arg name="cfg"   default="$(find project)/rviz/viewp4.rviz" />
   <param
     name="robot_description"
     textfile="$(find project)/urdf/twelvedof_new.urdf" />
@@ -13,8 +14,7 @@
     pkg="robot_state_publisher"
     type="robot_state_publisher" />
   <node
-    name="rviz"
+	  name="rviz" args="-d $(arg cfg)"
     pkg="rviz"
-    type="rviz"
-    args="-d $(find project)/urdf.rviz" />
+    type="rviz" />
 </launch>
