@@ -269,7 +269,7 @@
   <joint name="final1" type="fixed">
     <parent link="link6"/>
     <child  link="tip_elbow"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <origin xyz="0 0.2535 0.135" rpy="1.5708 0 -1.5708"/>
   </joint>
 
   <link name="tip_elbow"/>
@@ -501,7 +501,7 @@
   <joint name="final2" type="fixed">
     <parent link="link12"/>
     <child  link="tip_full"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <origin xyz="0 0.3035 0" rpy="0 -1.5708 0"/>
   </joint>
 
   <link name="tip_full"/>
@@ -1232,27 +1232,27 @@
 
   <!-- *** Motor 6 Output: Sphere1 *** -->
 
-  <joint name="attach-sphere1" type="fixed">
+  <joint name="attach-sphere" type="fixed">
     <parent link="tip_elbow"/>
-    <child  link="sphere1"/>
+    <child  link="sphere"/>
   </joint>
-  <link name="sphere1">
+  <link name="sphere">
     <visual>
-      <origin xyz="0 0.2535 0.135" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
 	      <sphere radius="0.01"/>
       </geometry>
       <material name="green"/>
     </visual>
     <collision>
-      <origin xyz="0 0.2535 0.135" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
 	      <sphere radius="0.01"/>
       </geometry>
       <material name="green"/>
     </collision>
     <inertial>
-      <origin xyz="0 0.2535 0.135" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.01"/>
       <inertia
         ixx="0.01" ixy="0.0" ixz="0.0"
@@ -1261,26 +1261,26 @@
     </inertial>
   </link>
 
-  <joint name="attach-cylinder1" type="fixed">
+  <joint name="attach-cylinder" type="fixed">
     <parent link="tip_elbow"/>
-    <child  link="cylinder1"/>
+    <child  link="cylinder"/>
   </joint>
-  <link name="cylinder1">
+  <link name="cylinder">
     <visual>
-      <origin xyz="0 0.2535 0.085" rpy="0 0 1.5708 "/>
+      <origin xyz="0 -0.05 0" rpy="1.5708 0 0"/>
       <geometry>
 	      <cylinder length="0.1" radius="0.01"/>
       </geometry>
       <material name="gray"/>
     </visual>
     <collision>
-      <origin xyz="0 0.2535 0.085" rpy="0 0 1.5708 "/>
+      <origin xyz="0 -0.05 0" rpy="1.5708 0 0"/>
       <geometry>
 	      <cylinder length="0.1" radius="0.01"/>
       </geometry>
     </collision>
     <inertial>
-      <origin xyz="0 0 0" rpy="0 1.5708 0"/>
+      <origin xyz="0 -0.05 0" rpy="1.5708 0 0"/>
       <mass value="0.01"/>
       <inertia
         ixx="0.500990" ixy="0.0" ixz="0.0"
@@ -1297,21 +1297,21 @@
   </joint>
   <link name="sphere2">
     <visual>
-      <origin xyz="0 0.3035 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
 	      <sphere radius="0.01"/>
       </geometry>
       <material name="green"/>
     </visual>
     <collision>
-      <origin xyz="0 0.3035 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
 	      <sphere radius="0.01"/>
       </geometry>
       <material name="green"/>
     </collision>
     <inertial>
-      <origin xyz="0 0 0.1" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.01"/>
       <inertia
         ixx="0.01" ixy="0.0" ixz="0.0"
@@ -1326,20 +1326,20 @@
   </joint>
   <link name="cylinder2">
     <visual>
-      <origin xyz="0 0.2535 0" rpy="1.5708 0 0"/>
+      <origin xyz="0 -0.05 0" rpy="1.5708 0 0"/>
       <geometry>
 	      <cylinder length="0.1" radius="0.01"/>
       </geometry>
       <material name="gray"/>
     </visual>
     <collision>
-      <origin xyz="0 0.2535 0" rpy="1.5708 0 0"/>
+      <origin xyz="0 -0.05 0" rpy="1.5708 0 0"/>
       <geometry>
 	      <cylinder length="0.1" radius="0.01"/>
       </geometry>
     </collision>
     <inertial>
-      <origin xyz="0 0 0" rpy="0 1.5708 0"/>
+      <origin xyz="0 -0.05 0" rpy="1.5708 0 0"/>
       <mass value="0.1"/>
       <inertia
         ixx="0.500990" ixy="0.0" ixz="0.0"
@@ -1380,7 +1380,7 @@
   <gazebo reference="mount11">   <material>Gazebo/Black</material> </gazebo>
   <gazebo reference="mount12">   <material>Gazebo/Black</material> </gazebo>
 
-  <gazebo reference="sphere1">  <material>Gazebo/Green</material>  </gazebo>
+  <gazebo reference="sphere">  <material>Gazebo/Green</material>  </gazebo>
   <gazebo reference="sphere2">  <material>Gazebo/Green</material>  </gazebo>  
  
 
