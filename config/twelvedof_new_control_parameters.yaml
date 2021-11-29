@@ -95,48 +95,48 @@ twelvedof:
   j1_pd_control:
     type: effort_controllers/JointPositionController
     joint: theta1
-    pid: {p: 70000.0, i: 0.0, d: 40.0}
+    pid: {p: 40000.0, i: 0.0, d: 20.0}
   j2_pd_control:
     type: effort_controllers/JointPositionController
     joint: theta2
-    pid: {p: 70000.0, i: 0.0, d: 40.0}
+    pid: {p: 40000.0, i: 0.0, d: 20.0}
   j3_pd_control:
     type: effort_controllers/JointPositionController
     joint: theta3
-    pid: {p: 70000.0, i: 0.0, d: 40.0}
+    pid: {p: 40000.0, i: 0.0, d: 20.0}
   j4_pd_control:
     type: effort_controllers/JointPositionController
     joint: theta4
-    pid: {p: 50000.0, i: 0.0, d: 40.0}
+    pid: {p: 30000.0, i: 0.0, d: 20.0}
   j5_pd_control:
     type: effort_controllers/JointPositionController
     joint: theta5
-    pid: {p: 50000.0, i: 0.0, d: 30.0}
+    pid: {p: 30000.0, i: 0.0, d: 10.0}
   j6_pd_control:
     type: effort_controllers/JointPositionController
     joint: theta6
-    pid: {p: 40000.0, i: 0.0, d: 30.0}
+    pid: {p: 20000.0, i: 0.0, d: 10.0}
   j7_pd_control:
     type: effort_controllers/JointPositionController
     joint: theta7
-    pid: {p: 40000.0, i: 0.0, d: 20.0}
+    pid: {p: 20000.0, i: 0.0, d: 10.0}
   j8_pd_control:
     type: effort_controllers/JointPositionController
     joint: theta8
-    pid: {p: 20000.0, i: 0.0, d: 20.0}
+    pid: {p: 10000.0, i: 0.0, d: 10.0}
   j9_pd_control:
     type: effort_controllers/JointPositionController
     joint: theta9
-    pid: {p: 20000.0, i: 0.0, d: 20.0}
+    pid: {p: 10000.0, i: 0.0, d: 10.0}
   j10_pd_control:
     type: effort_controllers/JointPositionController
     joint: theta10
-    pid: {p: 20000.0, i: 0.0, d: 10.0}
+    pid: {p: 10000.0, i: 0.0, d: 10.0}
   j11_pd_control:
     type: effort_controllers/JointPositionController
     joint: theta11
-    pid: {p: 1000.0, i: 0.0, d: 10.0}
+    pid: {p: 1000.0, i: 0.0, d: 5.0}
   j12_pd_control:
     type: effort_controllers/JointPositionController
     joint: theta12
-    pid: {p: 1000.0, i: 0.0, d: 10.0}
+    pid: {p: 1000.0, i: 0.0, d: 5.0}
