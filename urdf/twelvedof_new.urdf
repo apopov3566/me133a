@@ -10,7 +10,6 @@
     <origin xyz="0 0 0" rpy="0 0 1.5708" />
     <parent link="world" />
     <child link="base_link" />
-    <dynamics damping="5.0"/>
   </joint>
 
 <!-- FIRST HALF OF ARM -->
@@ -55,7 +54,7 @@
   <link name="link1">
     <inertial>
       <origin xyz="-3.53356132704072E-08 0.354939281214782 0.00987047993841249" rpy="0 0 0" />
-      <mass value="0.3" />
+      <mass value="0.1" />
       <inertia
         ixx="0.280533282193697"
         ixy="2.88502865128486E-08"
@@ -86,13 +85,13 @@
     <parent link="link1" />
     <child link="link2" />
     <axis xyz="1 0 0" />
-    <dynamics damping="4.0"/>
+    <dynamics damping="5.0"/>
   </joint>
   
   <link name="link2">
     <inertial>
       <origin xyz="-0.0990439236457107 -1.71025542616832E-08 0.194379212104546" rpy="0 0 0" />
-      <mass value="0.3" />
+      <mass value="0.1" />
       <inertia
         ixx="0.128935545829528"
         ixy="-3.59276704863955E-09"
@@ -123,14 +122,14 @@
     <parent link="link2" />
     <child link="link3" />
     <axis xyz="1 0 0" />
-    <dynamics damping="4.0"/>
+    <dynamics damping="1.0"/>
   </joint>
   
   
   <link name="link3">
     <inertial>
       <origin xyz="0.00160037543312781 -0.085257338513779 -2.42632615110594E-07" rpy="0 0 0" />
-      <mass value="0.3" />
+      <mass value="0.1" />
       <inertia
         ixx="0.0152262508313679"
         ixy="-0.000252854197484628"
@@ -161,13 +160,13 @@
     <parent link="link3" />
     <child link="link4" />
     <axis xyz="0 1 0" />
-    <dynamics damping="3.0"/>
+    <dynamics damping="0.2"/>
   </joint>
   
   <link name="link4">
     <inertial>
       <origin xyz="-2.42302114083718E-05 -0.132883357266087 0.0106425170632316" rpy="0 3.14159265358979 0" />
-      <mass value="0.2" />
+      <mass value="0.1" />
       <inertia
         ixx="0.00652454443000916"
         ixy="-2.63113923987127E-06"
@@ -198,14 +197,13 @@
     <parent link="link4" />
     <child link="link5" />
     <axis xyz="0 1 0" />
-    <dynamics damping="3.0"/>
+    <dynamics damping="0.2"/>
   </joint>
   
   <link name="link5">
     <inertial>
       <origin xyz="-8.59274472396303E-06 2.99480007459607E-09 -2.77555756156289E-17" rpy="0 0 0" />
-      <mass
-        value="0.2" />
+      <mass value="0.1" />
       <inertia
         ixx="0.000268508912730322"
         ixy="-1.05404001827445E-14"
@@ -236,14 +234,13 @@
     <parent link="link5" />
     <child link="link6" />
     <axis xyz="0 0 1" />
-    <dynamics damping="3.0"/>
+    <dynamics damping="0.2"/>
   </joint>
 
   <link name="link6">
     <inertial>
       <origin xyz="0.00520227831116674 0.273936626876202 -0.00509011096195712" rpy="0 0 0" />
-      <mass
-        value="0.2" />
+      <mass value="0.1" />
       <inertia
         ixx="0.0522030439082721"
         ixy="-0.00158209475866237"
@@ -285,14 +282,13 @@
     <parent link="link6" />
     <child link="link7" />
     <axis xyz="0 1 0" />
-    <dynamics damping="2.0"/>
+    <dynamics damping="0.2"/>
   </joint>
 
   <link name="link7">
     <inertial>
       <origin xyz="0.00477228657845705 0.337400616275791 6.70715527562038E-09" rpy="0 0 0" />
-      <mass
-        value="0.2" />
+      <mass value="0.1" />
       <inertia
         ixx="0.120977117963601"
         ixy="-0.00358173551662174"
@@ -323,14 +319,13 @@
     <parent link="link7" />
     <child link="link8" />
     <axis xyz="1 0 0" />
-    <dynamics damping="1.0"/>
+    <dynamics damping="5.0"/>
   </joint>
   
   <link name="link8">
     <inertial>
       <origin xyz="0.0878747586523721 -1.43544612862812E-08 -0.224736317123778" rpy="0 0 0" />
-      <mass
-        value="0.1" />
+      <mass value="0.1" />
       <inertia
         ixx="0.0796551330078775"
         ixy="5.6504092407821E-09"
@@ -361,15 +356,14 @@
     <parent link="link8" />
     <child link="link9" />
     <axis xyz="1 0 0" />
-    <dynamics damping="2.0"/>
+    <dynamics damping="1.0"/>
   </joint>
 
 
   <link name="link9">
     <inertial>
       <origin xyz="0.00664825369162243 -0.120416195839299 -2.48880200892643E-07" rpy="0 0 0" />
-      <mass
-        value="0.1" />
+      <mass value="0.1" />
       <inertia
         ixx="0.0114050795265076"
         ixy="-0.0002365697800322"
@@ -400,14 +394,13 @@
     <parent link="link9" />
     <child link="link10" />
     <axis xyz="0 1 0" />
-    <dynamics damping="1.0"/>
+    <dynamics damping="0.2"/>
   </joint>
 
   <link name="link10">
     <inertial>
       <origin xyz="-1.98334295971603E-05 -0.170343324915273 0.00871952863819403" rpy="0 0 0" />
-      <mass
-        value="0.1" />
+      <mass value="0.1" />
       <inertia
         ixx="0.00624074124214675"
         ixy="-2.56275777992662E-06"
@@ -438,14 +431,13 @@
     <parent link="link10" />
     <child link="link11" />
     <axis xyz="0 1 0" />
-    <dynamics damping="1.0"/>
+    <dynamics damping="0.2"/>
   </joint>
 
   <link name="link11">
     <inertial>
       <origin xyz="-8.5927447239665E-06 -2.99480018561837E-09 0" rpy="0 0 0" />
-      <mass
-        value="0.1" />
+      <mass value="0.1" />
       <inertia
         ixx="0.000268508912730321"
         ixy="1.05404015773174E-14"
@@ -476,14 +468,13 @@
     <parent link="link11" />
     <child link="link12" />
     <axis xyz="0 0 1" />
-    <dynamics damping="1.0"/>
+    <dynamics damping="0.2"/>
   </joint>
 
   <link name="link12">
     <inertial>
       <origin xyz="-2.44598371168525E-07 0.0871817473729875 0.0178255025763769" rpy="0 0 0" />
-      <mass
-        value="0.1" />
+      <mass value="0.1" />
       <inertia
         ixx="0.00449686744365017"
         ixy="-5.41238637157819E-09"
