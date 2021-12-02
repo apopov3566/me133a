@@ -174,85 +174,66 @@ class Generator:
         depth = 1.497
 
         spline_u = Goto(np.array([-0.1, depth, 0.5]),
-                        np.array([-0.1, depth, 1.2]), 5 * pi)
-        spline_l = Goto(np.array([-0.1, depth, 1.2]),
-                        np.array([-0.4, depth, 1.2]), 2 * pi)
-        spline_d = Goto(np.array([-0.4, depth, 1.2]),
-                        np.array([-0.4, depth, 0.5]), 5 * pi)
-        spline_r = Goto(np.array([-0.4, depth, 0.5]),
-                        np.array([-0.1, depth, 0.5]), 2 * pi)
+                        np.array([-0.8, depth, 0.5]), 1.0)
+        spline_l = Goto(np.array([-0.8, depth, 0.5]),
+                        np.array([-0.8, depth, 0.6]), 0.5)
+        spline_d = Goto(np.array([-0.8, depth, 0.6]),
+                        np.array([-0.1, depth, 0.6]), 1.0)
+        spline_r = Goto(np.array([-0.1, depth, 0.6]),
+                        np.array([-0.1, depth, 0.5]), 0.5)
 
         def full_pos_fun(u):
-            circle_offset = np.array([0.2 * sin(u), 0, 0.2 * cos(u)])
-            if u < 5 * pi:
-                return spline_u.evaluate(u)[0] + circle_offset
-            elif u < 7 * pi:
-                return spline_l.evaluate(u - 5 * pi)[0] + circle_offset
-            elif u < 12 * pi:
-                return spline_d.evaluate(u - 7 * pi)[0] + circle_offset
-            elif u < 14 * pi:
-                return spline_r.evaluate(u - 12 * pi)[0] + circle_offset
+            if u < 1.0:
+                return spline_u.evaluate(u)[0]
+            elif u < 1.5:
+                return spline_l.evaluate(u - 1.0)[0]
+            elif u < 2.5:
+                return spline_d.evaluate(u - 1.5)[0]
             else:
-                return spline_u.evaluate(u - 14 * pi)[0] + circle_offset
+                return spline_r.evaluate(u - 2.5)[0]
 
         def full_vel_fun(u):
-            circle_offset = np.array([0.2 * cos(u), 0, -0.2 * sin(u)])
-            if u < 5 * pi:
-                return spline_u.evaluate(u)[1] + circle_offset
-            elif u < 7 * pi:
-                return spline_l.evaluate(u - 5 * pi)[1] + circle_offset
-            elif u < 12 * pi:
-                return spline_d.evaluate(u - 7 * pi)[1] + circle_offset
-            elif u < 14 * pi:
-                return spline_r.evaluate(u - 12 * pi)[1] + circle_offset
+            if u < 1.0:
+                return spline_u.evaluate(u)[1]
+            elif u < 1.5:
+                return spline_l.evaluate(u - 1.0)[1]
+            elif u < 2.5:
+                return spline_d.evaluate(u - 1.5)[1]
             else:
-                return spline_u.evaluate(u - 14 * pi)[1] + circle_offset
+                return spline_r.evaluate(u - 2.5)[1]
 
-        spline1 = Goto(np.array([0.295, 0.6, 0.15]),
-                       np.array([0.295, 0.6, 0.65]), 1.0)
-        spline2 = Goto(np.array([0.295, 0.6, 0.65]),
-                       np.array([0.295, 0.8, 0.65]), 1.0)
-        spline3 = Goto(np.array([0.295, 0.8, 0.65]),
-                       np.array([0.295, 0.6, 0.95]), 1.0)
-        spline4 = Goto(np.array([0.295, 0.6, 0.95]),
-                       np.array([0.295, 0.6, 0.65]), 1.0)
-        spline5 = Goto(np.array([0.295, 0.6, 0.65]),
-                       np.array([0.295, 0.8, 0.95]), 1.0)
-        spline6 = Goto(np.array([0.295, 0.8, 0.95]),
-                       np.array([0.295, 0.6, 0.95]), 1.0)
+        spline1 = Goto(np.array([0.295, 0.6, 0.3]),
+                       np.array([0.295, 0.6, 0.6]), 1.0)
+        spline2 = Goto(np.array([0.295, 0.6, 0.6]),
+                       np.array([0.295, 0.7, 0.6]), 0.5)
+        spline3 = Goto(np.array([0.295, 0.7, 0.6]),
+                       np.array([0.295, 0.7, 0.3]), 1.0)
+        spline4 = Goto(np.array([0.295, 0.7, 0.3]),
+                       np.array([0.295, 0.6, 0.3]), 0.5)
 
         def elbow_pos_fun(u):
             if u < 1.0:
                 return spline1.evaluate(u)[0]
-            elif u < 2.0:
+            elif u < 1.5:
                 return spline2.evaluate(u - 1.0)[0]
-            elif u < 3.0:
-                return spline3.evaluate(u - 2.0)[0]
-            elif u < 4.0:
-                return spline4.evaluate(u - 3.0)[0]
-            elif u < 5.0:
-                return spline5.evaluate(u - 4.0)[0]
+            elif u < 2.5:
+                return spline3.evaluate(u - 1.5)[0]
             else:
-                return spline6.evaluate(u - 5.0)[0]
+                return spline4.evaluate(u - 2.5)[0]
 
         def elbow_vel_fun(u):
             if u < 1.0:
                 return spline1.evaluate(u)[1]
-            elif u < 2.0:
+            elif u < 1.5:
                 return spline2.evaluate(u - 1.0)[1]
-            elif u < 3.0:
-                return spline3.evaluate(u - 2.0)[1]
-            elif u < 4.0:
-                return spline4.evaluate(u - 3.0)[1]
-            elif u < 5.0:
-                return spline5.evaluate(u - 4.0)[1]
+            elif u < 2.5:
+                return spline3.evaluate(u - 1.5)[1]
             else:
-                return spline6.evaluate(u - 5.0)[1]
+                return spline4.evaluate(u - 2.5)[1]
 
-        self.ID = ImagesDriver(ImageDriver(Image(full_pos_fun, full_vel_fun, 19 * pi), 5, 0.5, np.array([0, 0, 0]), 10),
-                               # ImageDriver(Image(lambda u: np.array([0.1, 0.6 + 0.2 * sin(u), 0.7 + 0.2 * cos(u)]), lambda u: np.array([0, 0.2 * cos(u), -0.2 * sin(u)]), 10000), 2 * pi / 5, 2 * pi / 10, np.array([0, 0, 0]), 10),
+        self.ID = ImagesDriver(ImageDriver(Image(full_pos_fun, full_vel_fun, 3.0), 1, 0.1, np.array([0, 0, 0]), 10),
                                ImageDriver(
-                                   Image(elbow_pos_fun, elbow_vel_fun, 6.0), 1, 0.1, np.array([0, 0, 0]), 10),
+                                   Image(elbow_pos_fun, elbow_vel_fun, 3.0), 1, 0.1, np.array([0, 0, 0]), 10),
                                self.theta_a, 10, self.kin)
 
         self.pause_time = None

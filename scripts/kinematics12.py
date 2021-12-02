@@ -41,6 +41,22 @@ from urdf_parser_py.urdf import Robot
 #
 
 # Build T matrix from R/p.  Extract R/p from T matrix
+
+# Joint order
+#   - theta1
+#   - theta10
+#   - theta11
+#   - theta12
+#   - theta2
+#   - theta3
+#   - theta4
+#   - theta5
+#   - theta6
+#   - theta7
+#   - theta8
+#   - theta9
+
+
 def T_from_Rp(R, p):
     return np.vstack((np.hstack((R, p)), np.array([0.0, 0.0, 0.0, 1.0])))
 
@@ -225,46 +241,52 @@ class Kinematics:
         vd_combined,
         pe_combined,
         theta_a,
+        theta_target,
         l,
         keep_axes
     ):
-        joint_mins = {0: 0.0}
+        joint_mins = {}
         joint_maxs = {8: 0.8}
-        g = 10
+        g_max_min = 1
         theta_extra = np.array([0.0] * self.dofs[0])
+
         for joint in joint_mins:
-            theta_extra[joint] += g * \
+            theta_extra[joint] += g_max_min * \
                 max(0, (joint_mins[joint] -
                         theta_a.reshape(self.dofs[0])[joint]))
         for joint in joint_maxs:
-            theta_extra[joint] += g * \
+            theta_extra[joint] += g_max_min * \
                 min(0, (joint_maxs[joint] -
                         theta_a.reshape(self.dofs[0])[joint]))
 
-        g_center = 0.5
-        g_limit = 0.3
-        for joint in range(self.dofs[0]):
-            theta_extra[joint] += max(-g_limit, min(g_limit, g_center * (0.0 -
-                                                                         theta_a.reshape(self.dofs[0])[joint])))
+        g_track = 10
+        theta_extra[:6] += g_track * np.dot(
+            np.linalg.inv(J_combined[6:, :6]),
+            vd_combined[6:]
+            + l * pe_combined[6:],
+        ).reshape(6)
 
-        J_modified = J_combined[keep_axes, :]
+        # g_center = 0.0
+        # for joint in range(self.dofs[0]):
+        #     theta_extra[joint] += g_center * \
+        #         (0.0 - theta_a.reshape(self.dofs[0])[joint])
+
+        J_modified = J_combined[keep_axes.flatten(), :]
         return (
             np.dot(
                 np.linalg.pinv(J_modified),
-                vd_combined[keep_axes]
+                vd_combined[keep_axes.flatten()]
                 + l
-                * pe_combined[keep_axes],
+                * pe_combined[keep_axes.flatten()],
             ) + np.dot(np.eye(self.dofs[0]) - (np.linalg.pinv(J_modified) @ J_modified), theta_extra.reshape(self.dofs[0], 1))
         ).reshape(self.dofs[0])
 
-    def conditioned_with_keep_axes(
-        self,
-        J_combined,
-        keep_axes
-    ):
-        condition_threshold = 30
-        J_modified = J_combined[keep_axes, :]
-        return np.linalg.cond(J_modified) < condition_threshold
+    def get_condition_number(self, theta_a):
+        _, J_full_a = self.fkin(theta_a, 0)
+        _, J_elbow_a = self.fkin(theta_a[:6], 1)
+        J_combined = np.vstack(
+            (J_full_a, np.hstack((J_elbow_a, np.zeros((6, 6))))))
+        return np.linalg.cond(J_combined)
 
     def velocity_ikin_combined(
         self,
@@ -280,6 +302,7 @@ class Kinematics:
         wd_elbow,
         l,
         dt,
+        keep_num
     ):
         T_full, J_full = self.fkin(theta_d, 0)
         T_elbow, J_elbow = self.fkin(theta_d[:6], 1)
@@ -297,37 +320,29 @@ class Kinematics:
         R_elbow = R_from_T(T_elbow)
         R_elbow_a = R_from_T(T_elbow_a)
 
-        # print("J_full", J_full.shape)
-        # print("J_elbow", J_elbow.shape)
-        # exit(1)
-
         J_combined = np.vstack(
-            (J_full, np.hstack((J_elbow, np.zeros((6, 6))))))
+            (J_full_a, np.hstack((J_elbow_a, np.zeros((6, 6))))))
 
-        keep_order = [0, 1, 2, 3, 4, 5, 9, 10, 11, 8, 7, 6]
-        keep_num = len(keep_order)
+        keep_order = np.array([[0, 1, 2], [3, 4, 5], [9, 10, 11], [8, 7, 6]])
 
-        while (not self.conditioned_with_keep_axes(J_combined, keep_order[0:keep_num])):
-            keep_num -= 1
-
-        print(keep_num, np.linalg.cond(J_combined[keep_order[0:keep_num]]))
         theta_vel = self.velocity_ikin_keep_axes(
             J_combined,
             np.vstack((vd_full, wd_full, vd_elbow, wd_elbow)),
             np.vstack((
-                self.pe(pd_full, p_full),
-                self.Re(Rd_full, R_full),
-                self.pe(pd_elbow, p_elbow),
-                self.Re(Rd_elbow, R_elbow),
+                self.pe(pd_full, p_full_a),
+                self.Re(Rd_full, R_full_a),
+                self.pe(pd_elbow, p_elbow_a),
+                self.Re(Rd_elbow, R_elbow_a),
             )),
             theta_a,
+            {},
             l,
             keep_order[0:keep_num]
         )
 
         theta_new = theta_d + dt * theta_vel
 
-        return (theta_new, theta_vel)
+        return (theta_new, theta_vel, keep_num)
 
     def fkin(self, theta, chain=0):
         # Check the number of joints

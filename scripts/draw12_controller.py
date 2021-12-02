@@ -4,8 +4,11 @@ import numpy as np
 
 from gazebo_msgs.msg import LinkStates, ModelStates
 from sensor_msgs.msg import JointState
+from std_msgs.msg import Bool
 from project.msg import DrawingTip
 from urdf_parser_py.urdf import Robot
+
+from math import floor
 
 from kinematics import T_from_URDF_origin, T_from_Rp, R_from_q, p_from_T
 
@@ -13,7 +16,7 @@ from kinematics import T_from_URDF_origin, T_from_Rp, R_from_q, p_from_T
 CANVAS_WIDTH = 1
 CANVAS_HEIGHT = 1
 CANVAS_DEPTH = 0.01
-MIN_DRAW_DISTANCE = 0.003
+MIN_DRAW_DISTANCE = 0.01
 
 
 def getCanvases():
@@ -52,9 +55,16 @@ class Controller:
             "link6": self.getLinkToTipTransform("link6", "tip_elbow"),
             "link12": self.getLinkToTipTransform("link12", "tip_full"),
         }
+
+        self.extrude = False
+
         rospy.loginfo(self.Ts)
 
         self.canvases = getCanvases()
+
+        self.marks = []
+        for _ in self.canvases:
+            self.marks.append(np.zeros((200, 200)))
 
         self.last_marker = None
 
@@ -72,7 +82,8 @@ class Controller:
                 rospy.logerr("Unable find joint connecting to '%s'", frame)
                 raise Exception()
             if joint.parent == frame:
-                rospy.logerr("Joint '%s' connects '%s' to itself", joint.name, frame)
+                rospy.logerr("Joint '%s' connects '%s' to itself",
+                             joint.name, frame)
                 raise Exception()
             if joint.type != "fixed":
                 rospy.logerr("non-fixed joint between final link and tip")
@@ -85,6 +96,9 @@ class Controller:
             T = T @ T_from_URDF_origin(joint.origin)
 
         return T
+
+    def extrudecallback(self, data):
+        self.extrude = data.data
 
     def callback(self, data):
         for link in self.Ts:
@@ -112,30 +126,35 @@ class Controller:
             P = L @ T
             p = p_from_T(P).reshape(3)
 
-            touch = False
-            for C in self.canvases:
+            for C, m in zip(self.canvases, self.marks):
                 pc = p_from_T(C @ P).reshape(3)
+
+                m_height, m_width = m.shape
+                w = floor((pc[0] + CANVAS_WIDTH) / 2 / CANVAS_WIDTH * m_width)
+                h = floor((pc[2] + CANVAS_HEIGHT) /
+                          2 / CANVAS_HEIGHT * m_height)
+
                 if (
                     pc[1] < CANVAS_DEPTH
-                    and abs(pc[0]) < CANVAS_WIDTH
-                    and abs(pc[2]) < CANVAS_HEIGHT
+                    and w > 0 and w < m_width
+                    and h > 0 and h < m_height
+                    and m[h, w] == 0
+                    and (link == "link12" or self.extrude)
                 ):
-                    touch = True
-                    break
+                    m[h, w] = 1
 
-            if touch and (
-                self.last_marker is None
-                or np.linalg.norm(self.last_marker - p) > MIN_DRAW_DISTANCE
-            ):
-                self.last_marker = p
-                drawingtip = DrawingTip()
-                drawingtip.x = p[0]
-                drawingtip.y = p[1]
-                drawingtip.z = p[2]
-                self.tippub.publish(drawingtip)
+                    ps = np.array([pc[0], 0, pc[2], 1]).reshape((4, 1))
+                    surface_mark = (np.linalg.inv(C) @ ps).reshape(4)
+                    drawingtip = DrawingTip()
+                    drawingtip.x = surface_mark[0]
+                    drawingtip.y = surface_mark[1]
+                    drawingtip.z = surface_mark[2]
+                    self.tippub.publish(drawingtip)
+                    break
 
     def listener(self):
         rospy.Subscriber("/gazebo/link_states", LinkStates, self.callback)
+        rospy.Subscriber("/extrude", Bool, self.extrudecallback)
 
         # spin() simply keeps python from exiting until this node is stopped
         rospy.spin()

@@ -19,7 +19,7 @@ void counterCallback(const project::DrawingTip::ConstPtr &msg)
   markerMsg.set_type(ignition::msgs::Marker::SPHERE);
 
   ignition::msgs::Material *matMsg = markerMsg.mutable_material();
-  matMsg->mutable_script()->set_name("Gazebo/Black");
+  matMsg->mutable_script()->set_name("Gazebo/Blue");
 
   ignition::msgs::Set(markerMsg.mutable_pose(),
                       ignition::math::Pose3d(msg->x, msg->y, msg->z, 0, 0, 0));
