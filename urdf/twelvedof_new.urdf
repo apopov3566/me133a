@@ -272,7 +272,7 @@
   <joint name="final1" type="fixed">
     <parent link="link6"/>
     <child  link="tip_elbow"/>
-    <origin xyz="0 0.2535 0.135" rpy="1.5708 0 -1.5708"/>
+    <origin xyz="0 0.2535 0.1" rpy="1.5708 0 -1.5708"/>
   </joint>
 
   <link name="tip_elbow"/>
@@ -512,7 +512,7 @@
   <joint name="final2" type="fixed">
     <parent link="link12"/>
     <child  link="tip_full"/>
-    <origin xyz="0 0.2135 0" rpy="0 -1.5708 0"/>
+    <origin xyz="0 0.1 0" rpy="0 -1.5708 0"/>
   </joint>
 
   <link name="tip_full"/>
@@ -1338,20 +1338,20 @@
   </joint>
   <link name="cylinder2">
     <visual>
-      <origin xyz="0 -0.05 0" rpy="1.5708 0 0"/>
+      <origin xyz="0 -0.015 0" rpy="1.5708 0 0"/>
       <geometry>
-	      <cylinder length="0.1" radius="0.01"/>
+	      <cylinder length="0.03" radius="0.01"/>
       </geometry>
       <material name="gray"/>
     </visual>
     <collision>
-      <origin xyz="0 -0.05 0" rpy="1.5708 0 0"/>
+      <origin xyz="0 -0.015 0" rpy="1.5708 0 0"/>
       <geometry>
-	      <cylinder length="0.1" radius="0.01"/>
+	      <cylinder length="0.03" radius="0.01"/>
       </geometry>
     </collision>
     <inertial>
-      <origin xyz="0 -0.05 0" rpy="1.5708 0 0"/>
+      <origin xyz="0 -0.015 0" rpy="1.5708 0 0"/>
       <mass value="0.1"/>
       <inertia
         ixx="0.500990" ixy="0.0" ixz="0.0"
@@ -1365,6 +1365,19 @@
   <!-- *************************************************** -->
   <!-- ******************* Gazebo Colors ***************** -->
   <!-- *************************************************** -->
+  <gazebo reference="base_link"> <material>Gazebo/Gray</material>  </gazebo>
+  <gazebo reference="link1"> <material>Gazebo/Grass</material>  </gazebo>
+  <gazebo reference="link2"> <material>Gazebo/Grass</material>  </gazebo>
+  <gazebo reference="link3"> <material>Gazebo/Grass</material>  </gazebo>
+  <gazebo reference="link4"> <material>Gazebo/Grass</material>  </gazebo>
+  <gazebo reference="link5"> <material>Gazebo/Grass</material>  </gazebo>
+  <gazebo reference="link6"> <material>Gazebo/Grass</material>  </gazebo>
+  <gazebo reference="link7"> <material>Gazebo/Grass</material>  </gazebo>
+  <gazebo reference="link8"> <material>Gazebo/Grass</material>  </gazebo>
+  <gazebo reference="link9"> <material>Gazebo/Grass</material>  </gazebo>
+  <gazebo reference="link10"> <material>Gazebo/Grass</material>  </gazebo>
+  <gazebo reference="link11"> <material>Gazebo/Grass</material>  </gazebo>
+  <gazebo reference="link12"> <material>Gazebo/Grass</material>  </gazebo>
 
   <gazebo reference="motor1"> <material>Gazebo/Gray</material>  </gazebo>
   <gazebo reference="motor2"> <material>Gazebo/Gray</material>  </gazebo>
